@@ -3,8 +3,8 @@
 # Statistical shape analysis routines
 # written by Ian Dryden in R  (see http://cran.r-project.org)
 # (c) Ian Dryden
-#      version 1.2.8
-#                    2003-2025
+#      version 1.2.9
+#                    2003-2026
 #
 # Includes contributions by many other authors, including
 #   Mohammad Faghihi, Kwang-Rae Kim, Alfred Kume,
@@ -214,7 +214,7 @@ rho<-Enorm(U1[i,])
 ########
 pnss3d<-
 function (x, sphere.type = "BIC", mean.type="Frechet", alpha = 0.1, R = 100, 
-          nlast.small.sphere = 1, n.pc = "Full", output=TRUE) 
+          nlast.small.sphere = 1, n.pc = "Full", output=TRUE, pointcolor = 2, distr = "normal", penalty = 0)
 {
   k = dim(x)[1]
 m = dim(x)[2]
@@ -251,7 +251,7 @@ n = dim(x)[3]
   spheredata = t(out$spheredata)
   GPAout = out$GPAout
   pns.out = pns(x = spheredata, sphere.type = sphere.type, mean.type=mean.type, 
-                alpha = alpha, R = R, nlast.small.sphere = nlast.small.sphere, output=output)
+                alpha = alpha, R = R, nlast.small.sphere = nlast.small.sphere, output=output, pointcolor = pointcolor, distr = distr, penalty = penalty)
   pns.out$percent = pns.out$percent * sum(GPAout$percent[1:n.pc])/100
 if (output){
   print("Radii of spheres")
@@ -401,7 +401,7 @@ function (n.pc, X.hat, Xs, Tan, V)
 
 
 fastpns <- function (x, n.pc = "Full", sphere.type = "BIC", mean.type="Frechet", alpha = 0.1, 
-    R = 100, nlast.small.sphere = 1, distr="normal", output = TRUE, pointcolor = 2) 
+    R = 100, nlast.small.sphere = 1, output = TRUE, pointcolor = 2, distr="normal", penalty=0) 
 {
     n <- dim(x)[2]
   pdim <- dim(x)[1]
@@ -428,7 +428,7 @@ fastpns <- function (x, n.pc = "Full", sphere.type = "BIC", mean.type="Frechet",
     Xssubsphere <- t(ans)
     out <- pns( (Xssubsphere), sphere.type = sphere.type, mean.type=mean.type, alpha = alpha, 
         R = R, nlast.small.sphere = nlast.small.sphere, output = output, 
-        pointcolor = pointcolor)
+        pointcolor = pointcolor, distr=distr, penalty=penalty)
     out$percent <- out$percent * pcapercent
     cat(c("Percent explained by 1st three PNS scores out of total variability:", 
         "\n", round(out$percent[1:3], 2), "\n"))
@@ -1404,7 +1404,7 @@ sph2car1<-function (long, lat, radius = 1, deg = TRUE)
 
 
 
-pns_biplot<-function(pns, varnames=rownames(q),view1=1,view2=2,fastPNS=FALSE){
+pns_biplot<-function(pns, range=c(20:(-20))/10, varnames=rownames(q),view1=1,view2=2,fastPNS=FALSE){
 
  if (fastPNS){
     pns1<-pns
@@ -1415,8 +1415,8 @@ pns_biplot<-function(pns, varnames=rownames(q),view1=1,view2=2,fastPNS=FALSE){
  res<-matrix(0,41,nd-1)
  res1<-res
  res2<-res
- res1[,view1] <- (20:(-20))/10*sd( pns1$resmat[view1,])
- res2[,view2] <- (20:(-20))/10*sd( pns1$resmat[view2,])
+ res1[,view1] <- range*sd( pns1$resmat[view1,])
+ res2[,view2] <- range*sd( pns1$resmat[view2,])
 
 
 mshape <- fastPNSe2s( t(res1)*0 , pns1 )
@@ -1442,11 +1442,11 @@ else
   nd <- dim(pns$resmat)[1]+1
 palette(rainbow(nd))
 
- res<-matrix(0,41,nd-1)
+ res<-matrix(0,length(range),nd-1)
  res1 <- res
- res1[,view1] <- c( (20:(-20))/10*sd( pns1$resmat[view1,]))
+ res1[,view1] <- c( range*sd( pns1$resmat[view1,]))
  res2 <- res
- res2[,view2]  <- c( (20:(-20))/10*sd( pns1$resmat[view2,]))
+ res2[,view2]  <- c( range*sd( pns1$resmat[view2,]))
 
 
 aa1 <- PNSe2s( t(res1) , pns1$PNS ) -pns1$PNS$mean
@@ -4034,7 +4034,7 @@ procWGPA1 <- function(X,
       }
       
       mu <- tem
-      dif3 <- riemdist(old,  mu)
+      dif3 <- riemdist(old,  mu, reflect=reflect)
    }
    
    
@@ -4071,7 +4071,7 @@ procWGPA1 <- function(X,
    x <- X
    size <- apply(x, 3, centroid.size)
    rho <- apply(x, 3, y <- function(x) {
-      riemdist(x, z$mshape)
+      riemdist(x, z$mshape,reflect=reflect)
    })
    
    z$rho <- rho
@@ -8710,7 +8710,7 @@ procrustesGPA <-
          rho <- rep(0, times = n)
          size <- apply(x, 3, centroid.size)
          rho <- apply(x, 3, y <- function(x) {
-            riemdist(x, zgpa$mshape)
+            riemdist(x, zgpa$mshape,reflect=reflect)
          })
       }
       
@@ -8846,7 +8846,7 @@ procrustesGPA.rot <-
          rho <- rep(0, times = n)
          size <- apply(x, 3, centroid.size)
          rho <- apply(x, 3, y <- function(x) {
-            riemdist(x, zgpa$mshape)
+            riemdist(x, zgpa$mshape,reflect=reflect)
          })
       }
       

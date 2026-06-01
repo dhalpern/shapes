@@ -1,8 +1,12 @@
 # shapes 1.2.9
 
-In pns function changed the default method to BIC (as much faster)
+In several places use riemdist(x,y,reflect=reflect) so that the reflect option is correct within functions. Thanks to dhalpern
+
+In pns, pnss3d function changed the default method to BIC (as much faster)
 
 In pns function changed LR test to use chi-squared_1 critical value
+
+In fastpns included distr= option, as in pns 
 
 # shapes 1.2.8
 
